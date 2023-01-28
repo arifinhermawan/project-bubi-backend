@@ -1,0 +1,8 @@
+database:
+  driver: "postgres"
+  host: "localhost"
+  name: "bubi"
+  password: "postgres"
+  port: 5432
+  user: "postgres"
+  
