@@ -2,15 +2,27 @@ package server
 
 import (
 	// internal package
-	"github.com/arifinhermawan/bubi/internal/service/sample"
+	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
+	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
+// Resources holds all available resources in bubi app.
 type Resources struct {
-	sample *sample.Resource
+	account *account.Resource
 }
 
-func NewResource() *Resources {
+// ResourceParam represents parameters needed to initialize Resources.
+type ResourceParam struct {
+	DB *pgsql.DBRepository
+}
+
+// NewResource will initialize a new instance of Resources.
+func NewResource(param ResourceParam) *Resources {
+	accountResourceParam := account.AccountResourceParam{
+		DB: param.DB,
+	}
+
 	return &Resources{
-		sample: sample.NewResource(),
+		account: account.NewResource(accountResourceParam),
 	}
 }

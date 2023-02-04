@@ -5,4 +5,8 @@ database:
   password: "tbd"
   port: 5432
   user: "tbd"
+  default_timeout_in_seconds: 5
   
+redis:
+  address: "tbd:6379"
+  password: ""

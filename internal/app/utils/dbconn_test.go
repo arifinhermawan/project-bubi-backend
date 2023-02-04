@@ -2,10 +2,10 @@ package utils
 
 import (
 	// golang package
-	"database/sql"
 	"testing"
 
 	// external package
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
@@ -14,9 +14,9 @@ import (
 )
 
 func TestInitDBConn(t *testing.T) {
-	sqlOpenOri := sqlOpen
+	sqlxOpenOri := sqlxOpen
 	defer func() {
-		sqlOpen = sqlOpenOri
+		sqlxOpen = sqlxOpenOri
 	}()
 
 	type args struct {
@@ -25,22 +25,32 @@ func TestInitDBConn(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		mockSqlOpen func(driverName, dataSourceName string) (*sql.DB, error)
+		mockSqlOpen func(driverName, dataSourceName string) (*sqlx.DB, error)
+		want        *sqlx.DB
 		wantErr     error
 	}{
 		{
 			name: "when_sqlOpen_error_then_return_error",
 			args: args{},
-			mockSqlOpen: func(driverName, dataSourceName string) (*sql.DB, error) {
+			mockSqlOpen: func(driverName, dataSourceName string) (*sqlx.DB, error) {
 				return nil, assert.AnError
 			},
 			wantErr: assert.AnError,
 		},
+		{
+			name: "when_no_error_occured_then_return_db_and_nil",
+			args: args{},
+			mockSqlOpen: func(driverName, dataSourceName string) (*sqlx.DB, error) {
+				return &sqlx.DB{}, nil
+			},
+			want: &sqlx.DB{},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			sqlOpen = test.mockSqlOpen
-			err := InitDBConn(test.args.cfg)
+			sqlxOpen = test.mockSqlOpen
+			got, err := InitDBConn(test.args.cfg)
+			assert.Equal(t, test.want, got)
 			assert.Equal(t, test.wantErr, err)
 		})
 	}
