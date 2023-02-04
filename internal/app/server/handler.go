@@ -2,15 +2,22 @@ package server
 
 import (
 	// internal package
-	"github.com/arifinhermawan/bubi/internal/server/sample"
+	"github.com/arifinhermawan/bubi/internal/server/account"
 )
 
+// Handlers holds all available handlers in bubi app.
 type Handlers struct {
-	Sample *sample.Handler
+	Account *account.Handler
 }
 
-func NewHandler() *Handlers {
+// NewHandler initialize new instance of Handlers.
+func NewHandler(usecases *UseCases, infra *Infra) *Handlers {
+	accountHandlerParam := account.AccountHandlerParam{
+		Account: usecases.account,
+		Infra:   infra,
+	}
+
 	return &Handlers{
-		Sample: sample.NewHandler(),
+		Account: account.NewHandler(accountHandlerParam),
 	}
 }

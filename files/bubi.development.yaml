@@ -5,4 +5,8 @@ database:
   password: "postgres"
   port: 5432
   user: "postgres"
-  
+  default_timeout_in_seconds: 5
+
+redis:
+  address: "localhost:6379"
+  password: ""

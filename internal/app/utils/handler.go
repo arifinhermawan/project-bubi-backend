@@ -24,10 +24,10 @@ func HandleRequest(handlers *server.Handlers) {
 
 // handleGetRequest will handle request with type GET
 func handleGetRequest(handlers *server.Handlers, router *mux.Router) {
-	router.HandleFunc("/", handlers.Sample.HelloWorld).Methods("GET")
 }
 
 // handlePostRequest will handle request with type POST
 func handlePostRequest(handlers *server.Handlers, router *mux.Router) {
-	router.HandleFunc("/", handlers.Sample.HelloWorld).Methods("POST")
+	// account
+	router.HandleFunc("/account/signup", handlers.Account.HandleUserSignUp).Methods("POST")
 }

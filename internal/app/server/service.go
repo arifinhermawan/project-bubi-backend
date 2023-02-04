@@ -2,15 +2,21 @@ package server
 
 import (
 	// internal package
-	"github.com/arifinhermawan/bubi/internal/service/sample"
+	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
+// Services holds all available services in bubi app.
 type Services struct {
-	sample *sample.Service
+	account *account.Service
 }
 
-func NewService() *Services {
+// NewService will initialize a new instance of Services.
+func NewService(rsc *Resources) *Services {
+	accountServiceParam := account.AccountServiceParam{
+		Rsc: rsc.account,
+	}
+
 	return &Services{
-		sample: sample.NewService(),
+		account: account.NewService(accountServiceParam),
 	}
 }
