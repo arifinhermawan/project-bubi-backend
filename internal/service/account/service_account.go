@@ -3,35 +3,55 @@ package account
 import (
 	// golang package
 	"context"
+	"errors"
 	"log"
 
 	// external package
 	"golang.org/x/crypto/bcrypt"
-
-	// internal package
-	"github.com/arifinhermawan/bubi/internal/entity"
 )
 
 var (
+	errIncorrectPassword = errors.New("incorrect password!")
+
 	// for mocking purpose
 	compareHashPassword  = bcrypt.CompareHashAndPassword
 	generateFromPassword = bcrypt.GenerateFromPassword
 )
 
-// CheckIsAccountExist will check whether an account is already exist by using email.
-func (svc *Service) CheckIsAccountExist(ctx context.Context, email string) (bool, error) {
+// CheckPasswordCorrect will check whether user's password match with current password or not.
+func (svc *Service) CheckPasswordCorrect(ctx context.Context, email, password string) error {
+	meta := map[string]interface{}{
+		"email": email,
+	}
+
+	account, err := svc.rsc.GetUserAccountByEmailFromDB(ctx, email)
+	if err != nil {
+		log.Printf("[CheckPasswordCorrect] svc.rsc.GetUserAccountByEmailFromDB() got an error: %+v\nMeta:%+v\n", err, meta)
+		return err
+	}
+
+	err = compareHashPassword([]byte(account.Password), []byte(password))
+	if err != nil {
+		log.Printf("[CheckPasswordCorrect] compareHashPassword() got an error: %+v\nMeta:%+v\n", errIncorrectPassword, meta)
+		return errIncorrectPassword
+	}
+
+	return nil
+}
+
+// GetUserAccountByEmail will check whether an account is already exist by using email.
+func (svc *Service) GetUserAccountByEmail(ctx context.Context, email string) (Account, error) {
 	account, err := svc.rsc.GetUserAccountByEmailFromDB(ctx, email)
 	if err != nil {
 		meta := map[string]interface{}{
 			"email": email,
 		}
 
-		log.Printf("[CheckIsAccountExist] svc.rsc.GetUserAccountByEmailFromDB() got an error: %+v\nMeta:%+v\n", err, meta)
-		return false, err
+		log.Printf("[GetUserAccountByEmail] svc.rsc.GetUserAccountByEmailFromDB() got an error: %+v\nMeta:%+v\n", err, meta)
+		return Account{}, err
 	}
 
-	isAccountExist := account != entity.Account{}
-	return isAccountExist, nil
+	return Account(account), nil
 }
 
 // InsertUserAccount will create a new user account.

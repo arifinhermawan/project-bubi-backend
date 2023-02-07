@@ -3,6 +3,7 @@ package server
 import (
 	// internal package
 	"io"
+	"net/http"
 	"time"
 
 	// internal package
@@ -10,6 +11,10 @@ import (
 )
 
 //go:generate mockgen -source=infra.go -destination=infra_mock.go -package=server
+
+type authenticationProvider interface {
+	JWTAuthorization(endpointHandler func(writer http.ResponseWriter, request *http.Request)) http.HandlerFunc
+}
 
 // configProvider provides methods available in config infra.
 type configProvider interface {
@@ -40,6 +45,7 @@ type readerProvider interface {
 
 // InfraParam represents parameters needed to initialize infrastructure.
 type InfraParam struct {
+	Auth   authenticationProvider
 	Config configProvider
 	Golang golangProvider
 	Reader readerProvider
@@ -47,6 +53,7 @@ type InfraParam struct {
 
 // Infra holds methods needed to initialize infrastructure.
 type Infra struct {
+	Auth   authenticationProvider
 	Config configProvider
 	Golang golangProvider
 	Reader readerProvider
@@ -55,6 +62,7 @@ type Infra struct {
 // NewInfra will initialize a new instance of Infra.
 func NewInfra(param InfraParam) *Infra {
 	return &Infra{
+		Auth:   param.Auth,
 		Config: param.Config,
 		Golang: param.Golang,
 		Reader: param.Reader,
@@ -79,6 +87,10 @@ func (infra *Infra) JsonMarshal(input interface{}) ([]byte, error) {
 // JsonUnmarshal parses the JSON-encoded data and stores the result in the value pointed to by dest.
 func (infra *Infra) JsonUnmarshal(input []byte, dest interface{}) error {
 	return infra.Golang.JsonUnmarshal(input, dest)
+}
+
+func (infra *Infra) JWTAuthorization(endpointHandler func(writer http.ResponseWriter, request *http.Request)) http.HandlerFunc {
+	return infra.Auth.JWTAuthorization(endpointHandler)
 }
 
 // ReadAll reads from r until an error or EOF and returns the data it read.

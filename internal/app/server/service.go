@@ -11,9 +11,10 @@ type Services struct {
 }
 
 // NewService will initialize a new instance of Services.
-func NewService(rsc *Resources) *Services {
+func NewService(rsc *Resources, infra *Infra) *Services {
 	accountServiceParam := account.AccountServiceParam{
-		Rsc: rsc.account,
+		Rsc:   rsc.account,
+		Infra: infra,
 	}
 
 	return &Services{

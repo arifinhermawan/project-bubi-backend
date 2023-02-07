@@ -13,21 +13,23 @@ import (
 )
 
 // HandleRequest handles all incoming request to backend.
-func HandleRequest(handlers *server.Handlers) {
+func HandleRequest(infra *server.Infra, handlers *server.Handlers) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	handleGetRequest(handlers, router)
-	handlePostRequest(handlers, router)
+	handleGetRequest(infra, handlers, router)
+	handlePostRequest(infra, handlers, router)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // handleGetRequest will handle request with type GET
-func handleGetRequest(handlers *server.Handlers, router *mux.Router) {
+func handleGetRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
 }
 
 // handlePostRequest will handle request with type POST
-func handlePostRequest(handlers *server.Handlers, router *mux.Router) {
+func handlePostRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
 	// account
+	router.HandleFunc("/account/login", handlers.Account.HandleUserLogIn).Methods("POST")
+	router.HandleFunc("/account/logout", handlers.Account.HandlerUserLogOut).Methods("POST")
 	router.HandleFunc("/account/signup", handlers.Account.HandleUserSignUp).Methods("POST")
 }

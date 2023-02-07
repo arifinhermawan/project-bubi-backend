@@ -10,3 +10,10 @@ database:
 redis:
   address: "localhost:6379"
   password: ""
+
+account:
+  expired_times_in_hour: 1
+
+jwt:
+  secret: Vxk6#~Tx/2,ke}M'tV{q)a:Kg;sLqT3%)`O1p".e=0IY$5l"i"X3efiD)F~GXWD
+  ttl_in_seconds: 3600 # 1 hour

@@ -10,67 +10,65 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
-
 	// internal package
-	"github.com/arifinhermawan/bubi/internal/entity"
 )
 
-func TestService_CheckIsAccountExist(t *testing.T) {
-	mockEmail := "jieun.lee@iu.com"
+// func TestService_CheckIsAccountExist(t *testing.T) {
+// 	mockEmail := "jieun.lee@iu.com"
 
-	type mockFields struct {
-		rsc *MockresourceProvider
-	}
-	tests := []struct {
-		name       string
-		args       string
-		mockFields func(mockFields)
-		want       bool
-		wantErr    error
-	}{
-		{
-			name: "when_GetUserAccountByEmailFromDB_error_then_return_error",
-			args: mockEmail,
-			mockFields: func(mf mockFields) {
-				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{}, assert.AnError)
-			},
-			wantErr: assert.AnError,
-		},
-		{
-			name: "when_account_exist_then_return_true",
-			args: mockEmail,
-			mockFields: func(mf mockFields) {
-				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{ID: 123}, nil)
-			},
-			want: true,
-		},
-		{
-			name: "when_account_not_exist_then_return_false",
-			args: mockEmail,
-			mockFields: func(mf mockFields) {
-				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{}, nil)
-			},
-			want: false,
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			ctrl := gomock.NewController(t)
-			mockFields := mockFields{
-				rsc: NewMockresourceProvider(ctrl),
-			}
-			test.mockFields(mockFields)
+// 	type mockFields struct {
+// 		rsc *MockresourceProvider
+// 	}
+// 	tests := []struct {
+// 		name       string
+// 		args       string
+// 		mockFields func(mockFields)
+// 		want       bool
+// 		wantErr    error
+// 	}{
+// 		{
+// 			name: "when_GetUserAccountByEmailFromDB_error_then_return_error",
+// 			args: mockEmail,
+// 			mockFields: func(mf mockFields) {
+// 				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{}, assert.AnError)
+// 			},
+// 			wantErr: assert.AnError,
+// 		},
+// 		{
+// 			name: "when_account_exist_then_return_true",
+// 			args: mockEmail,
+// 			mockFields: func(mf mockFields) {
+// 				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{ID: 123}, nil)
+// 			},
+// 			want: true,
+// 		},
+// 		{
+// 			name: "when_account_not_exist_then_return_false",
+// 			args: mockEmail,
+// 			mockFields: func(mf mockFields) {
+// 				mf.rsc.EXPECT().GetUserAccountByEmailFromDB(context.Background(), mockEmail).Return(entity.Account{}, nil)
+// 			},
+// 			want: false,
+// 		},
+// 	}
+// 	for _, test := range tests {
+// 		t.Run(test.name, func(t *testing.T) {
+// 			ctrl := gomock.NewController(t)
+// 			mockFields := mockFields{
+// 				rsc: NewMockresourceProvider(ctrl),
+// 			}
+// 			test.mockFields(mockFields)
 
-			svc := &Service{
-				rsc: mockFields.rsc,
-			}
+// 			svc := &Service{
+// 				rsc: mockFields.rsc,
+// 			}
 
-			got, err := svc.CheckIsAccountExist(context.Background(), test.args)
-			assert.Equal(t, test.want, got)
-			assert.Equal(t, test.wantErr, err)
-		})
-	}
-}
+// 			got, err := svc.CheckIsAccountExist(context.Background(), test.args)
+// 			assert.Equal(t, test.want, got)
+// 			assert.Equal(t, test.wantErr, err)
+// 		})
+// 	}
+// }
 
 func TestService_InsertUserAccount(t *testing.T) {
 	generateFromPasswordOri := bcrypt.GenerateFromPassword

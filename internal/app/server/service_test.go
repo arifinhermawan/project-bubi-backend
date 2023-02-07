@@ -13,13 +13,15 @@ import (
 
 func TestNewService(t *testing.T) {
 	mockRsc := &Resources{}
+	mockInfra := &Infra{}
 
 	want := &Services{
 		account: account.NewService(account.AccountServiceParam{
-			Rsc: mockRsc.account,
+			Infra: mockInfra,
+			Rsc:   mockRsc.account,
 		}),
 	}
 
-	got := NewService(mockRsc)
+	got := NewService(mockRsc, mockInfra)
 	assert.Equal(t, want, got)
 }

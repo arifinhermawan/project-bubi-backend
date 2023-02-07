@@ -10,6 +10,14 @@ import (
 
 // accountUCManager holds all methods served by usecase account that will be needed by account handler.
 type accountUCManager interface {
+	// LogIn handles the log in process for a user.
+	// It will check the existence of a user first.
+	// If it exist, then it will continue the log in process.
+	LogIn(ctx context.Context, email, password string) (string, error)
+
+	// LogOut handles the log out process for a user.
+	LogOut(ctx context.Context, userID int64) error
+
 	// UserSignUp will process the creation of user account.
 	// Before creating a new account, it'll check whether that account exist or not.
 	// If it's a new account, then it'll create a new user account.

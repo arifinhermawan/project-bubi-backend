@@ -35,6 +35,35 @@ func (m *MockaccountUCManager) EXPECT() *MockaccountUCManagerMockRecorder {
 	return m.recorder
 }
 
+// LogIn mocks base method.
+func (m *MockaccountUCManager) LogIn(ctx context.Context, email, password string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogIn", ctx, email, password)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LogIn indicates an expected call of LogIn.
+func (mr *MockaccountUCManagerMockRecorder) LogIn(ctx, email, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogIn", reflect.TypeOf((*MockaccountUCManager)(nil).LogIn), ctx, email, password)
+}
+
+// LogOut mocks base method.
+func (m *MockaccountUCManager) LogOut(ctx context.Context, userID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LogOut", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LogOut indicates an expected call of LogOut.
+func (mr *MockaccountUCManagerMockRecorder) LogOut(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogOut", reflect.TypeOf((*MockaccountUCManager)(nil).LogOut), ctx, userID)
+}
+
 // UserSignUp mocks base method.
 func (m *MockaccountUCManager) UserSignUp(ctx context.Context, email, password string) error {
 	m.ctrl.T.Helper()

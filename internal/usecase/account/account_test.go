@@ -8,7 +8,157 @@ import (
 	// external package
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/service/account"
 )
+
+func TestUseCase_LogIn(t *testing.T) {
+	type mockFields struct {
+		accountSvc *MockaccountServiceProvider
+	}
+
+	type args struct {
+		email    string
+		password string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		mockFields func(mockFields)
+		want       string
+		wantErr    error
+	}{
+		{
+			name: "when_GetUserAccountByEmail_error_then_return_error",
+			args: args{email: "email"},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{}, assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_account_not_exist_then_return_error",
+			args: args{email: "email"},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{}, nil)
+			},
+			wantErr: errUserNotExist,
+		},
+		{
+			name: "when_CheckPasswordCorrect_error_then_return_error",
+			args: args{
+				email:    "email",
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{
+					ID: 123,
+				}, nil)
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "pass").Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_GenerateJWT_error_then_return_error",
+			args: args{
+				email:    "email",
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{
+					ID: 123,
+				}, nil)
+
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "pass").Return(nil)
+				mf.accountSvc.EXPECT().GenerateJWT(context.Background(), int64(123), "email").Return("", assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_no_error_occured_then_return_nil",
+			args: args{
+				email:    "email",
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{
+					ID: 123,
+				}, nil)
+
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "pass").Return(nil)
+				mf.accountSvc.EXPECT().GenerateJWT(context.Background(), int64(123), "email").Return("abc", nil)
+			},
+			want: "abc",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountSvc: NewMockaccountServiceProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			uc := &UseCase{
+				account: mockFields.accountSvc,
+			}
+
+			got, err := uc.LogIn(context.Background(), test.args.email, test.args.password)
+			assert.Equal(t, test.want, got)
+			assert.Equal(t, test.wantErr, err)
+		})
+	}
+}
+
+func TestUseCase_LogOut(t *testing.T) {
+	type mockFields struct {
+		accountSvc *MockaccountServiceProvider
+	}
+
+	type args struct {
+		userID int64
+	}
+	tests := []struct {
+		name       string
+		args       args
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_InvalidateJWT_then_return_error",
+			args: args{userID: 1234},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().InvalidateJWT(context.Background(), int64(1234)).Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_no_error_occured_then_return_nil",
+			args: args{userID: 1234},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().InvalidateJWT(context.Background(), int64(1234)).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountSvc: NewMockaccountServiceProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			uc := &UseCase{
+				account: mockFields.accountSvc,
+			}
+
+			err := uc.LogOut(context.Background(), test.args.userID)
+			assert.Equal(t, test.wantErr, err)
+
+		})
+	}
+}
 
 func TestUseCase_UserSignUp(t *testing.T) {
 	type mockFields struct {
@@ -25,18 +175,18 @@ func TestUseCase_UserSignUp(t *testing.T) {
 		wantErr    error
 	}{
 		{
-			name: "when_CheckIsAccountExist_error_then_return_error",
+			name: "when_GetUserAccountByEmail_error_then_return_error",
 			args: args{email: "email"},
 			mockFields: func(mf mockFields) {
-				mf.accountSvc.EXPECT().CheckIsAccountExist(context.Background(), "email").Return(false, assert.AnError)
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{}, assert.AnError)
 			},
 			wantErr: assert.AnError,
 		},
 		{
-			name: "when_CheckIsAccountExist_return_true_then_return_error",
+			name: "when_account_exist_then_return_error",
 			args: args{email: "email"},
 			mockFields: func(mf mockFields) {
-				mf.accountSvc.EXPECT().CheckIsAccountExist(context.Background(), "email").Return(true, nil)
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{ID: 123}, nil)
 			},
 			wantErr: errUserExist,
 		},
@@ -47,7 +197,7 @@ func TestUseCase_UserSignUp(t *testing.T) {
 				password: "passw0rd",
 			},
 			mockFields: func(mf mockFields) {
-				mf.accountSvc.EXPECT().CheckIsAccountExist(context.Background(), "email").Return(false, nil)
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{}, nil)
 				mf.accountSvc.EXPECT().InsertUserAccount(context.Background(), "email", "passw0rd").Return(assert.AnError)
 			},
 			wantErr: assert.AnError,
@@ -59,7 +209,7 @@ func TestUseCase_UserSignUp(t *testing.T) {
 				password: "passw0rd",
 			},
 			mockFields: func(mf mockFields) {
-				mf.accountSvc.EXPECT().CheckIsAccountExist(context.Background(), "email").Return(false, nil)
+				mf.accountSvc.EXPECT().GetUserAccountByEmail(context.Background(), "email").Return(account.Account{}, nil)
 				mf.accountSvc.EXPECT().InsertUserAccount(context.Background(), "email", "passw0rd").Return(nil)
 			},
 		},

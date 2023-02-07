@@ -8,7 +8,9 @@ import (
 	context "context"
 	sql "database/sql"
 	reflect "reflect"
+	time "time"
 
+	configuration "github.com/arifinhermawan/bubi/internal/infrastructure/configuration"
 	pgsql "github.com/arifinhermawan/bubi/internal/repository/pgsql"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -106,4 +108,121 @@ func (m *MockdbRepoProvider) Rollback(tx *sql.Tx) error {
 func (mr *MockdbRepoProviderMockRecorder) Rollback(tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockdbRepoProvider)(nil).Rollback), tx)
+}
+
+// MockinfraRepoProvider is a mock of infraRepoProvider interface.
+type MockinfraRepoProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockinfraRepoProviderMockRecorder
+}
+
+// MockinfraRepoProviderMockRecorder is the mock recorder for MockinfraRepoProvider.
+type MockinfraRepoProviderMockRecorder struct {
+	mock *MockinfraRepoProvider
+}
+
+// NewMockinfraRepoProvider creates a new mock instance.
+func NewMockinfraRepoProvider(ctrl *gomock.Controller) *MockinfraRepoProvider {
+	mock := &MockinfraRepoProvider{ctrl: ctrl}
+	mock.recorder = &MockinfraRepoProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockinfraRepoProvider) EXPECT() *MockinfraRepoProviderMockRecorder {
+	return m.recorder
+}
+
+// GetConfig mocks base method.
+func (m *MockinfraRepoProvider) GetConfig() *configuration.AppConfig {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetConfig")
+	ret0, _ := ret[0].(*configuration.AppConfig)
+	return ret0
+}
+
+// GetConfig indicates an expected call of GetConfig.
+func (mr *MockinfraRepoProviderMockRecorder) GetConfig() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockinfraRepoProvider)(nil).GetConfig))
+}
+
+// JsonUnmarshal mocks base method.
+func (m *MockinfraRepoProvider) JsonUnmarshal(input []byte, dest interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "JsonUnmarshal", input, dest)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// JsonUnmarshal indicates an expected call of JsonUnmarshal.
+func (mr *MockinfraRepoProviderMockRecorder) JsonUnmarshal(input, dest interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JsonUnmarshal", reflect.TypeOf((*MockinfraRepoProvider)(nil).JsonUnmarshal), input, dest)
+}
+
+// MockredisRepoProvider is a mock of redisRepoProvider interface.
+type MockredisRepoProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockredisRepoProviderMockRecorder
+}
+
+// MockredisRepoProviderMockRecorder is the mock recorder for MockredisRepoProvider.
+type MockredisRepoProviderMockRecorder struct {
+	mock *MockredisRepoProvider
+}
+
+// NewMockredisRepoProvider creates a new mock instance.
+func NewMockredisRepoProvider(ctrl *gomock.Controller) *MockredisRepoProvider {
+	mock := &MockredisRepoProvider{ctrl: ctrl}
+	mock.recorder = &MockredisRepoProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockredisRepoProvider) EXPECT() *MockredisRepoProviderMockRecorder {
+	return m.recorder
+}
+
+// Del mocks base method.
+func (m *MockredisRepoProvider) Del(ctx context.Context, key string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Del", ctx, key)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Del indicates an expected call of Del.
+func (mr *MockredisRepoProviderMockRecorder) Del(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Del", reflect.TypeOf((*MockredisRepoProvider)(nil).Del), ctx, key)
+}
+
+// Get mocks base method.
+func (m *MockredisRepoProvider) Get(ctx context.Context, key string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, key)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockredisRepoProviderMockRecorder) Get(ctx, key interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockredisRepoProvider)(nil).Get), ctx, key)
+}
+
+// Set mocks base method.
+func (m *MockredisRepoProvider) Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Set", ctx, key, value, expiration)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Set indicates an expected call of Set.
+func (mr *MockredisRepoProviderMockRecorder) Set(ctx, key, value, expiration interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Set", reflect.TypeOf((*MockredisRepoProvider)(nil).Set), ctx, key, value, expiration)
 }

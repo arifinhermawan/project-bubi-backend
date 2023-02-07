@@ -6,12 +6,153 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	// external package
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestHandler_HandleUserLogIn(t *testing.T) {
+	type mockFields struct {
+		accountUC *MockaccountUCManager
+		infra     *MockinfraProvider
+	}
+	tests := []struct {
+		name          string
+		emailValid    bool
+		passwordValid bool
+		mockFields    func(mockFields)
+	}{
+		{
+			name:          "when_email_empty_then_return_bad_request",
+			emailValid:    false,
+			passwordValid: true,
+			mockFields:    func(mf mockFields) {},
+		},
+		{
+			name:       "when_password_empty_then_return_bad_request",
+			emailValid: true,
+			mockFields: func(mf mockFields) {},
+		},
+		{
+			name:          "when_LogIn_error_then_return_internal_server_error",
+			emailValid:    true,
+			passwordValid: true,
+			mockFields: func(mf mockFields) {
+				mf.accountUC.EXPECT().LogIn(context.Background(), "email", "password").Return("", assert.AnError)
+			},
+		},
+		{
+			name:          "when_no_error_occured_then_return_status_ok",
+			emailValid:    true,
+			passwordValid: true,
+			mockFields: func(mf mockFields) {
+				mf.accountUC.EXPECT().LogIn(context.Background(), "email", "password").Return("", nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountUC: NewMockaccountUCManager(ctrl),
+				infra:     NewMockinfraProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			h := &Handler{
+				account: mockFields.accountUC,
+				infra:   mockFields.infra,
+			}
+
+			req := httptest.NewRequest(http.MethodPost, "/account/login", nil)
+			req.Form = url.Values{
+				"email":    []string{"email"},
+				"password": []string{"password"},
+			}
+
+			if !test.emailValid {
+				req.Form = url.Values{
+					"email": []string{""},
+				}
+			}
+
+			if !test.passwordValid {
+				req.Form = url.Values{
+					"email":    []string{"email"},
+					"password": []string{},
+				}
+			}
+
+			w := httptest.NewRecorder()
+
+			h.HandleUserLogIn(w, req)
+		})
+	}
+}
+
+func TestHandler_HandlerUserLogOut(t *testing.T) {
+	type mockFields struct {
+		accountUC *MockaccountUCManager
+		infra     *MockinfraProvider
+	}
+	tests := []struct {
+		name        string
+		userIDValid bool
+		mockFields  func(mockFields)
+	}{
+		{
+			name:        "when_user_id_invalid_then_return_immediately",
+			userIDValid: false,
+			mockFields:  func(mf mockFields) {},
+		},
+		{
+			name:        "when_LogOut_error_then_return_immediately",
+			userIDValid: true,
+			mockFields: func(mf mockFields) {
+				mf.accountUC.EXPECT().LogOut(context.Background(), int64(1234)).Return(assert.AnError)
+			},
+		},
+		{
+			name:        "when_no_error_occured_then_return_success",
+			userIDValid: true,
+			mockFields: func(mf mockFields) {
+				mf.accountUC.EXPECT().LogOut(context.Background(), int64(1234)).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountUC: NewMockaccountUCManager(ctrl),
+				infra:     NewMockinfraProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			h := &Handler{
+				account: mockFields.accountUC,
+				infra:   mockFields.infra,
+			}
+
+			req := httptest.NewRequest(http.MethodPost, "/account/logout", nil)
+			req.Form = url.Values{
+				"user_id": []string{"abc"},
+			}
+			if test.userIDValid {
+				req.Form = url.Values{
+					"user_id": []string{"1234"},
+				}
+			}
+
+			w := httptest.NewRecorder()
+
+			h.HandlerUserLogOut(w, req)
+		})
+	}
+}
 
 func TestHandler_HandleUserSignUp(t *testing.T) {
 	type mockFields struct {
