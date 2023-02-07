@@ -34,7 +34,8 @@ func TestDBRepository_GetUserAccountByEmail(t *testing.T) {
 			record_period_start,
 			first_name,
 			last_name,
-			id
+			id,
+			password
 		FROM
 			user_account
 		WHERE

@@ -6,12 +6,50 @@ package server
 
 import (
 	io "io"
+	http "net/http"
 	reflect "reflect"
 	time "time"
 
 	configuration "github.com/arifinhermawan/bubi/internal/infrastructure/configuration"
 	gomock "github.com/golang/mock/gomock"
 )
+
+// MockauthenticationProvider is a mock of authenticationProvider interface.
+type MockauthenticationProvider struct {
+	ctrl     *gomock.Controller
+	recorder *MockauthenticationProviderMockRecorder
+}
+
+// MockauthenticationProviderMockRecorder is the mock recorder for MockauthenticationProvider.
+type MockauthenticationProviderMockRecorder struct {
+	mock *MockauthenticationProvider
+}
+
+// NewMockauthenticationProvider creates a new mock instance.
+func NewMockauthenticationProvider(ctrl *gomock.Controller) *MockauthenticationProvider {
+	mock := &MockauthenticationProvider{ctrl: ctrl}
+	mock.recorder = &MockauthenticationProviderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockauthenticationProvider) EXPECT() *MockauthenticationProviderMockRecorder {
+	return m.recorder
+}
+
+// JWTAuthorization mocks base method.
+func (m *MockauthenticationProvider) JWTAuthorization(endpointHandler func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "JWTAuthorization", endpointHandler)
+	ret0, _ := ret[0].(http.HandlerFunc)
+	return ret0
+}
+
+// JWTAuthorization indicates an expected call of JWTAuthorization.
+func (mr *MockauthenticationProviderMockRecorder) JWTAuthorization(endpointHandler interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JWTAuthorization", reflect.TypeOf((*MockauthenticationProvider)(nil).JWTAuthorization), endpointHandler)
+}
 
 // MockconfigProvider is a mock of configProvider interface.
 type MockconfigProvider struct {

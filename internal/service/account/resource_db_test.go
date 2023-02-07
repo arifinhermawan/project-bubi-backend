@@ -159,7 +159,6 @@ func TestResource_InsertUserAccountToDB(t *testing.T) {
 				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
 				mf.db.EXPECT().InsertUserAccount(context.Background(), &sql.Tx{}, "email", "password").Return(nil)
 				mf.db.EXPECT().Commit(&sql.Tx{}).Return(nil)
-				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(nil)
 			},
 		},
 	}

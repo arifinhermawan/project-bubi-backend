@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	account "github.com/arifinhermawan/bubi/internal/service/account"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -34,19 +35,48 @@ func (m *MockaccountServiceProvider) EXPECT() *MockaccountServiceProviderMockRec
 	return m.recorder
 }
 
-// CheckIsAccountExist mocks base method.
-func (m *MockaccountServiceProvider) CheckIsAccountExist(ctx context.Context, email string) (bool, error) {
+// CheckPasswordCorrect mocks base method.
+func (m *MockaccountServiceProvider) CheckPasswordCorrect(ctx context.Context, email, password string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckIsAccountExist", ctx, email)
-	ret0, _ := ret[0].(bool)
+	ret := m.ctrl.Call(m, "CheckPasswordCorrect", ctx, email, password)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CheckPasswordCorrect indicates an expected call of CheckPasswordCorrect.
+func (mr *MockaccountServiceProviderMockRecorder) CheckPasswordCorrect(ctx, email, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckPasswordCorrect", reflect.TypeOf((*MockaccountServiceProvider)(nil).CheckPasswordCorrect), ctx, email, password)
+}
+
+// GenerateJWT mocks base method.
+func (m *MockaccountServiceProvider) GenerateJWT(ctx context.Context, userID int64, email string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GenerateJWT", ctx, userID, email)
+	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CheckIsAccountExist indicates an expected call of CheckIsAccountExist.
-func (mr *MockaccountServiceProviderMockRecorder) CheckIsAccountExist(ctx, email interface{}) *gomock.Call {
+// GenerateJWT indicates an expected call of GenerateJWT.
+func (mr *MockaccountServiceProviderMockRecorder) GenerateJWT(ctx, userID, email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckIsAccountExist", reflect.TypeOf((*MockaccountServiceProvider)(nil).CheckIsAccountExist), ctx, email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateJWT", reflect.TypeOf((*MockaccountServiceProvider)(nil).GenerateJWT), ctx, userID, email)
+}
+
+// GetUserAccountByEmail mocks base method.
+func (m *MockaccountServiceProvider) GetUserAccountByEmail(ctx context.Context, email string) (account.Account, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserAccountByEmail", ctx, email)
+	ret0, _ := ret[0].(account.Account)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserAccountByEmail indicates an expected call of GetUserAccountByEmail.
+func (mr *MockaccountServiceProviderMockRecorder) GetUserAccountByEmail(ctx, email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserAccountByEmail", reflect.TypeOf((*MockaccountServiceProvider)(nil).GetUserAccountByEmail), ctx, email)
 }
 
 // InsertUserAccount mocks base method.
@@ -61,4 +91,18 @@ func (m *MockaccountServiceProvider) InsertUserAccount(ctx context.Context, emai
 func (mr *MockaccountServiceProviderMockRecorder) InsertUserAccount(ctx, email, password interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertUserAccount", reflect.TypeOf((*MockaccountServiceProvider)(nil).InsertUserAccount), ctx, email, password)
+}
+
+// InvalidateJWT mocks base method.
+func (m *MockaccountServiceProvider) InvalidateJWT(ctx context.Context, userID int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InvalidateJWT", ctx, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InvalidateJWT indicates an expected call of InvalidateJWT.
+func (mr *MockaccountServiceProviderMockRecorder) InvalidateJWT(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateJWT", reflect.TypeOf((*MockaccountServiceProvider)(nil).InvalidateJWT), ctx, userID)
 }

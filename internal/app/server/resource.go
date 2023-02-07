@@ -3,6 +3,7 @@ package server
 import (
 	// internal package
 	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
+	"github.com/arifinhermawan/bubi/internal/repository/redis"
 	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
@@ -13,13 +14,17 @@ type Resources struct {
 
 // ResourceParam represents parameters needed to initialize Resources.
 type ResourceParam struct {
-	DB *pgsql.DBRepository
+	DB    *pgsql.DBRepository
+	Cache *redis.RedisRepository
+	Infra *Infra
 }
 
 // NewResource will initialize a new instance of Resources.
 func NewResource(param ResourceParam) *Resources {
 	accountResourceParam := account.AccountResourceParam{
-		DB: param.DB,
+		Cache: param.Cache,
+		Infra: param.Infra,
+		DB:    param.DB,
 	}
 
 	return &Resources{

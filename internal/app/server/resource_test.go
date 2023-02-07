@@ -9,20 +9,27 @@ import (
 
 	// internal package
 	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
+	"github.com/arifinhermawan/bubi/internal/repository/redis"
 	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
 func TestNewResource(t *testing.T) {
 	mockDB := &pgsql.DBRepository{}
+	mockCache := &redis.RedisRepository{}
+	mockInfra := &Infra{}
 
 	want := &Resources{
 		account: account.NewResource(account.AccountResourceParam{
-			DB: mockDB,
+			DB:    mockDB,
+			Cache: mockCache,
+			Infra: mockInfra,
 		}),
 	}
 
 	got := NewResource(ResourceParam{
-		DB: mockDB,
+		DB:    mockDB,
+		Cache: mockCache,
+		Infra: mockInfra,
 	})
 
 	assert.Equal(t, want, got)
