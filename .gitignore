@@ -15,4 +15,4 @@
 vendor/
 
 # configuration files
-./files/*
+files/
