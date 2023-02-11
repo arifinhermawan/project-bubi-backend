@@ -65,3 +65,32 @@ func (repo *DBRepository) InsertUserAccount(ctx context.Context, tx *sql.Tx, ema
 
 	return nil
 }
+
+// UpdateUserAccount will update user's account information.
+func (repo *DBRepository) UpdateUserAccount(ctx context.Context, tx *sql.Tx, param UpdateUserAccountParam) error {
+	timeout := time.Duration(repo.infra.GetConfig().Database.DefaultTimeout) * time.Second
+	ctxQuery, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	namedParam := map[string]interface{}{
+		"first_name":    param.FirstName,
+		"id":            param.UserID,
+		"last_name":     param.LastName,
+		"record_period": param.RecordPeriod,
+		"updated_at":    repo.infra.GetTimeGMT7(),
+	}
+
+	namedQuery, args, err := funcSQLXNamed(queryUpdateUserAccount, namedParam)
+	if err != nil {
+		log.Printf("[UpdateUserAccount] funcSQLXNamed got an error: %+v\nMeta:%+v\n", err, namedParam)
+		return err
+	}
+
+	_, err = tx.ExecContext(ctxQuery, repo.db.Rebind(namedQuery), args...)
+	if err != nil {
+		log.Printf("[UpdateUserAccount] tx.ExecContext() got an error: %+v\nMeta:%+v\n", err, namedParam)
+		return err
+	}
+
+	return nil
+}

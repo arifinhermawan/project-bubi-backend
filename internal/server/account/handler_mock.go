@@ -9,6 +9,7 @@ import (
 	io "io"
 	reflect "reflect"
 
+	account "github.com/arifinhermawan/bubi/internal/usecase/account"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -62,6 +63,20 @@ func (m *MockaccountUCManager) LogOut(ctx context.Context, userID int64) error {
 func (mr *MockaccountUCManagerMockRecorder) LogOut(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogOut", reflect.TypeOf((*MockaccountUCManager)(nil).LogOut), ctx, userID)
+}
+
+// UpdateUserAccount mocks base method.
+func (m *MockaccountUCManager) UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserAccount", ctx, param)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserAccount indicates an expected call of UpdateUserAccount.
+func (mr *MockaccountUCManagerMockRecorder) UpdateUserAccount(ctx, param interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccount", reflect.TypeOf((*MockaccountUCManager)(nil).UpdateUserAccount), ctx, param)
 }
 
 // UserSignUp mocks base method.

@@ -29,6 +29,9 @@ type dbRepoProvider interface {
 
 	// Rollback will aborts the transaction.
 	Rollback(tx *sql.Tx) error
+
+	// UpdateUserAccount will update user's account information.
+	UpdateUserAccount(ctx context.Context, tx *sql.Tx, param pgsql.UpdateUserAccountParam) error
 }
 
 // infraRepoProvider holds all methods from infra that will be needed in resource.

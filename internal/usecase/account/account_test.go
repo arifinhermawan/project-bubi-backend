@@ -1,16 +1,12 @@
 package account
 
 import (
-	// golang package
 	"context"
 	"testing"
 
-	// external package
+	"github.com/arifinhermawan/bubi/internal/service/account"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
-
-	// internal package
-	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
 func TestUseCase_LogIn(t *testing.T) {
@@ -156,6 +152,59 @@ func TestUseCase_LogOut(t *testing.T) {
 			err := uc.LogOut(context.Background(), test.args.userID)
 			assert.Equal(t, test.wantErr, err)
 
+		})
+	}
+}
+
+func TestUseCase_UpdateUserAccount(t *testing.T) {
+	type mockFields struct {
+		accountSvc *MockaccountServiceProvider
+	}
+
+	mockArgs := UpdateUserAccountParam{
+		FirstName:    "Ji Eun",
+		LastName:     "Lee",
+		RecordPeriod: 25,
+		UserID:       123,
+	}
+
+	tests := []struct {
+		name       string
+		args       UpdateUserAccountParam
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_UpdateUserAccount_error_then_return_error",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().UpdateUserAccount(context.Background(), account.UpdateUserAccountParam(mockArgs)).Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_no_error_occured_then_return_nil",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().UpdateUserAccount(context.Background(), account.UpdateUserAccountParam(mockArgs)).Return(nil)
+			},
+			wantErr: nil,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountSvc: NewMockaccountServiceProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			uc := &UseCase{
+				account: mockFields.accountSvc,
+			}
+
+			err := uc.UpdateUserAccount(context.Background(), test.args)
+			assert.Equal(t, test.wantErr, err)
 		})
 	}
 }

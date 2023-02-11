@@ -16,20 +16,32 @@ type userSignUpParam struct {
 	Password string `json:"password"`
 }
 
+// updateUserAccount represents parameters needed to update user account.
+type updateUserAccount struct {
+	FirstName    string `json:"first_name"`
+	LastName     string `json:"last_name"`
+	RecordPeriod int    `json:"record_period"`
+	UserID       int64  `json:"user_id"`
+}
+
 // ------------------------
 // | structs for response |
 // ------------------------
 
-// userSignUpResponse represents response that will be given by endpoint /account/signup
-type userLogInResponse struct {
+// defaultResponse represents default response of an API call
+type defaultResponse struct {
 	Code  int    `json:"code"`
 	Error string `json:"error"`
+}
+
+// userSignUpResponse represents response that will be given by endpoint /account/signup
+type userLogInResponse struct {
+	defaultResponse
 	Token string `json:"token"`
 }
 
 // userSignUpResponse represents response that will be given by endpoint /account/signup
 type userSignUpResponse struct {
-	Code    int    `json:"code"`
-	Error   string `json:"error"`
+	defaultResponse
 	Message string `json:"message"`
 }

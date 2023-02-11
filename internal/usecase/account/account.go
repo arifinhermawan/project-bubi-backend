@@ -65,6 +65,25 @@ func (uc *UseCase) LogOut(ctx context.Context, userID int64) error {
 	return nil
 }
 
+// UpdateUserAccount will update information of a user account.
+// Field that will be updated are: first_name, last_name, and record_period.
+func (uc *UseCase) UpdateUserAccount(ctx context.Context, param UpdateUserAccountParam) error {
+	meta := map[string]interface{}{
+		"first_name":    param.FirstName,
+		"last_name":     param.LastName,
+		"record_period": param.RecordPeriod,
+		"user_id":       param.UserID,
+	}
+
+	err := uc.account.UpdateUserAccount(ctx, account.UpdateUserAccountParam(param))
+	if err != nil {
+		log.Printf("[UpdateUserAccount] uc.account.UpdateUserAccount() got an error: %+v\nMeta:%+v\n", err, meta)
+		return err
+	}
+
+	return nil
+}
+
 // UserSignUp will process the creation of user account.
 // Before creating a new account, it'll check whether that account exist or not.
 // If it's a new account, then it'll create a new user account.

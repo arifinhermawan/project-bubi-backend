@@ -109,6 +109,20 @@ func (mr *MockresourceProviderMockRecorder) SetJWTToCache(ctx, userID, jwt inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetJWTToCache", reflect.TypeOf((*MockresourceProvider)(nil).SetJWTToCache), ctx, userID, jwt)
 }
 
+// UpdateUserAccountInDB mocks base method.
+func (m *MockresourceProvider) UpdateUserAccountInDB(ctx context.Context, param UpdateUserAccountParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserAccountInDB", ctx, param)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserAccountInDB indicates an expected call of UpdateUserAccountInDB.
+func (mr *MockresourceProviderMockRecorder) UpdateUserAccountInDB(ctx, param interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccountInDB", reflect.TypeOf((*MockresourceProvider)(nil).UpdateUserAccountInDB), ctx, param)
+}
+
 // MockinfraProvider is a mock of infraProvider interface.
 type MockinfraProvider struct {
 	ctrl     *gomock.Controller

@@ -17,6 +17,7 @@ func HandleRequest(infra *server.Infra, handlers *server.Handlers) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	handleGetRequest(infra, handlers, router)
+	handlePatchRequest(infra, handlers, router)
 	handlePostRequest(infra, handlers, router)
 
 	log.Fatal(http.ListenAndServe(":8080", router))
@@ -24,6 +25,12 @@ func HandleRequest(infra *server.Infra, handlers *server.Handlers) {
 
 // handleGetRequest will handle request with type GET
 func handleGetRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
+}
+
+// handleGetRequest will handle request with type GET
+func handlePatchRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
+	// account
+	router.HandleFunc("/account/update", infra.Auth.JWTAuthorization(handlers.Account.HandleUpdateUserAccount)).Methods("PATCH")
 }
 
 // handlePostRequest will handle request with type POST

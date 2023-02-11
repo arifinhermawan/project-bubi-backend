@@ -74,3 +74,21 @@ func (svc *Service) InsertUserAccount(ctx context.Context, email, password strin
 
 	return nil
 }
+
+// UpdateUserAccount will update the information of an existing user account.
+func (svc *Service) UpdateUserAccount(ctx context.Context, param UpdateUserAccountParam) error {
+	meta := map[string]interface{}{
+		"first_name":    param.FirstName,
+		"last_name":     param.LastName,
+		"record_period": param.RecordPeriod,
+		"user_id":       param.UserID,
+	}
+
+	err := svc.rsc.UpdateUserAccountInDB(ctx, param)
+	if err != nil {
+		log.Printf("[UpdateUserAccount] svc.rsc.UpdateUserAccountInDB() got an error: %+v\nMeta:%+v\n", err, meta)
+		return err
+	}
+
+	return nil
+}

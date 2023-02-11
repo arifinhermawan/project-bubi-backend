@@ -24,4 +24,16 @@ const (
 			:created_at
 		)
 	`
+
+	queryUpdateUserAccount = `
+		UPDATE
+			user_account
+		SET 
+			first_name = :first_name,
+			last_name = :last_name,
+			record_period_start = :record_period,
+			updated_at = :updated_at
+		WHERE
+			id = :id
+	`
 )

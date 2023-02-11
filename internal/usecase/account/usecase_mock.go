@@ -106,3 +106,17 @@ func (mr *MockaccountServiceProviderMockRecorder) InvalidateJWT(ctx, userID inte
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateJWT", reflect.TypeOf((*MockaccountServiceProvider)(nil).InvalidateJWT), ctx, userID)
 }
+
+// UpdateUserAccount mocks base method.
+func (m *MockaccountServiceProvider) UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserAccount", ctx, param)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserAccount indicates an expected call of UpdateUserAccount.
+func (mr *MockaccountServiceProviderMockRecorder) UpdateUserAccount(ctx, param interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccount", reflect.TypeOf((*MockaccountServiceProvider)(nil).UpdateUserAccount), ctx, param)
+}
