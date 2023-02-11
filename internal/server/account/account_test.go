@@ -1,7 +1,6 @@
 package account
 
 import (
-	// golang package
 	"context"
 	"encoding/json"
 	"net/http"
@@ -9,7 +8,7 @@ import (
 	"net/url"
 	"testing"
 
-	// external package
+	"github.com/arifinhermawan/bubi/internal/usecase/account"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -150,6 +149,152 @@ func TestHandler_HandlerUserLogOut(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			h.HandlerUserLogOut(w, req)
+		})
+	}
+}
+
+func TestHandler_HandleUpdateUserAccount(t *testing.T) {
+	type mockFields struct {
+		accountUC *MockaccountUCManager
+		infra     *MockinfraProvider
+	}
+	tests := []struct {
+		name       string
+		mockFields func(mockFields)
+	}{
+		{
+			name: "when_ReadAll_error_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, assert.AnError)
+			},
+		},
+		{
+			name: "when_JsonUnmarshal_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var dest updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &dest).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_first_name_is_empty_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var dest updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &dest).Return(nil)
+			},
+		},
+		{
+			name: "when_record_period_0_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserAccount) = updateUserAccount{
+							FirstName:    "Ji Eun",
+							LastName:     "Lee",
+							RecordPeriod: 0,
+						}
+
+						return nil
+					})
+			},
+		},
+		{
+			name: "when_user_id_not_valid_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserAccount) = updateUserAccount{
+							FirstName:    "Ji Eun",
+							LastName:     "Lee",
+							RecordPeriod: 1,
+							UserID:       0,
+						}
+
+						return nil
+					})
+			},
+		},
+		{
+			name: "when_UpdateUserAccount_error_then_return_internal_server_error",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserAccount) = updateUserAccount{
+							FirstName:    "Ji Eun",
+							LastName:     "Lee",
+							RecordPeriod: 1,
+							UserID:       1234,
+						}
+
+						return nil
+					})
+
+				mf.accountUC.EXPECT().UpdateUserAccount(context.Background(), account.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 1,
+					UserID:       1234,
+				}).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_no_error_then_return_status_ok",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserAccount
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserAccount) = updateUserAccount{
+							FirstName:    "Ji Eun",
+							LastName:     "Lee",
+							RecordPeriod: 1,
+							UserID:       1234,
+						}
+
+						return nil
+					})
+
+				mf.accountUC.EXPECT().UpdateUserAccount(context.Background(), account.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 1,
+					UserID:       1234,
+				}).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/account/update", nil)
+
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountUC: NewMockaccountUCManager(ctrl),
+				infra:     NewMockinfraProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			h := &Handler{
+				account: mockFields.accountUC,
+				infra:   mockFields.infra,
+			}
+
+			w := httptest.NewRecorder()
+
+			h.HandleUpdateUserAccount(w, req)
 		})
 	}
 }

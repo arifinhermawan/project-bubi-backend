@@ -1,18 +1,14 @@
 package account
 
 import (
-	// golang package
 	"context"
 	"database/sql"
 	"testing"
 
-	// external package
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
-
-	// internal package
 	"github.com/arifinhermawan/bubi/internal/entity"
 	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestResource_GetUserAccountByEmailFromDB(t *testing.T) {
@@ -91,7 +87,6 @@ func TestResource_InsertUserAccountToDB(t *testing.T) {
 	}
 
 	type args struct {
-		ctx      context.Context
 		email    string
 		password string
 	}
@@ -136,7 +131,7 @@ func TestResource_InsertUserAccountToDB(t *testing.T) {
 			wantErr: assert.AnError,
 		},
 		{
-			name: "when_failed_to_commit_then_rollback_the_transaction",
+			name: "when_failed_to_commit_then_log_the_error",
 			args: args{
 				email:    "email",
 				password: "password",
@@ -145,9 +140,7 @@ func TestResource_InsertUserAccountToDB(t *testing.T) {
 				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
 				mf.db.EXPECT().InsertUserAccount(context.Background(), &sql.Tx{}, "email", "password").Return(nil)
 				mf.db.EXPECT().Commit(&sql.Tx{}).Return(assert.AnError)
-				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(nil)
 			},
-			wantErr: assert.AnError,
 		},
 		{
 			name: "when_no_error_occured_then_return_nil_error",
@@ -175,6 +168,108 @@ func TestResource_InsertUserAccountToDB(t *testing.T) {
 			}
 
 			err := rsc.InsertUserAccountToDB(context.Background(), test.args.email, test.args.password)
+			assert.Equal(t, test.wantErr, err)
+		})
+	}
+}
+
+func TestResource_UpdateUserAccountInDB(t *testing.T) {
+	type mockFields struct {
+		db *MockdbRepoProvider
+	}
+
+	mockArgs := UpdateUserAccountParam{
+		FirstName:    "Ji Eun",
+		LastName:     "Lee",
+		RecordPeriod: 25,
+		UserID:       123,
+	}
+	tests := []struct {
+		name       string
+		args       UpdateUserAccountParam
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_BeginTX_error_then_return_error",
+			args: UpdateUserAccountParam{},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(nil, assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_UpdateUserAccount_error_then_rollback_transaction_then_return_error",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserAccount(context.Background(), &sql.Tx{}, pgsql.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 25,
+					UserID:       123,
+				}).Return(assert.AnError)
+				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(nil)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_InsertUserAccount_error_and_failed_to_rollback_transaction_then_log_the_error_then_return_error",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserAccount(context.Background(), &sql.Tx{}, pgsql.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 25,
+					UserID:       123,
+				}).Return(assert.AnError)
+				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_failed_to_commit_then_log_the_error",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserAccount(context.Background(), &sql.Tx{}, pgsql.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 25,
+					UserID:       123,
+				}).Return(nil)
+				mf.db.EXPECT().Commit(&sql.Tx{}).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_no_error_occured_then_return_nil_error",
+			args: mockArgs,
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserAccount(context.Background(), &sql.Tx{}, pgsql.UpdateUserAccountParam{
+					FirstName:    "Ji Eun",
+					LastName:     "Lee",
+					RecordPeriod: 25,
+					UserID:       123,
+				}).Return(nil)
+				mf.db.EXPECT().Commit(&sql.Tx{}).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				db: NewMockdbRepoProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			rsc := Resource{
+				db: mockFields.db,
+			}
+
+			err := rsc.UpdateUserAccountInDB(context.Background(), test.args)
 			assert.Equal(t, test.wantErr, err)
 		})
 	}

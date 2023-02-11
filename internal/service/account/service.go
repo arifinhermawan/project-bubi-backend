@@ -28,6 +28,9 @@ type resourceProvider interface {
 
 	// SetJWTToCache will save jwt of a user in cache
 	SetJWTToCache(ctx context.Context, userID int64, jwt string) error
+
+	// UpdateUserAccountInDB will update user's account based on the given parameter.
+	UpdateUserAccountInDB(ctx context.Context, param UpdateUserAccountParam) error
 }
 
 // infraProvider holds all methods from infra that will be needed in resource.

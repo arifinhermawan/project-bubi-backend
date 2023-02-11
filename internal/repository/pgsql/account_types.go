@@ -14,3 +14,11 @@ type Account struct {
 	Password          string         `db:"password"`
 	RecordPeriodStart int            `db:"record_period_start"`
 }
+
+// UpdateUserAccountParam represents parameters needed to update user's account
+type UpdateUserAccountParam struct {
+	FirstName    string
+	LastName     string
+	RecordPeriod int
+	UserID       int64
+}

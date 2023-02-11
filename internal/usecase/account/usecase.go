@@ -4,6 +4,7 @@ import (
 	// golang package
 	"context"
 
+	// internal package
 	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
@@ -27,6 +28,9 @@ type accountServiceProvider interface {
 
 	// InvalidateJWT will delete user's cached JWT.
 	InvalidateJWT(ctx context.Context, userID int64) error
+
+	// UpdateUserAccount will update the information of an existing user account.
+	UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error
 }
 
 // AccountUsecaseParam holds all parameters needed to instantiate

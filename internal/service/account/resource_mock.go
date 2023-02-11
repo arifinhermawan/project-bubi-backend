@@ -110,6 +110,20 @@ func (mr *MockdbRepoProviderMockRecorder) Rollback(tx interface{}) *gomock.Call 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockdbRepoProvider)(nil).Rollback), tx)
 }
 
+// UpdateUserAccount mocks base method.
+func (m *MockdbRepoProvider) UpdateUserAccount(ctx context.Context, tx *sql.Tx, param pgsql.UpdateUserAccountParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserAccount", ctx, tx, param)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserAccount indicates an expected call of UpdateUserAccount.
+func (mr *MockdbRepoProviderMockRecorder) UpdateUserAccount(ctx, tx, param interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccount", reflect.TypeOf((*MockdbRepoProvider)(nil).UpdateUserAccount), ctx, tx, param)
+}
+
 // MockinfraRepoProvider is a mock of infraRepoProvider interface.
 type MockinfraRepoProvider struct {
 	ctrl     *gomock.Controller

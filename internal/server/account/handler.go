@@ -4,6 +4,9 @@ import (
 	// golang package
 	"context"
 	"io"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/usecase/account"
 )
 
 //go:generate mockgen -source=handler.go -destination=handler_mock.go -package=account
@@ -17,6 +20,10 @@ type accountUCManager interface {
 
 	// LogOut handles the log out process for a user.
 	LogOut(ctx context.Context, userID int64) error
+
+	// UpdateUserAccount will update information of a user account.
+	// Field that will be updated are: first_name, last_name, and record_period.
+	UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error
 
 	// UserSignUp will process the creation of user account.
 	// Before creating a new account, it'll check whether that account exist or not.

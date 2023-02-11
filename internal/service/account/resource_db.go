@@ -8,6 +8,7 @@ import (
 
 	// internal package
 	"github.com/arifinhermawan/bubi/internal/entity"
+	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
 )
 
 // GetUserAccountByEmailFromDB will fetch user's information based of account's email.
@@ -60,10 +61,46 @@ func (rsc *Resource) InsertUserAccountToDB(ctx context.Context, email, password 
 		return err
 	}
 
-	err = rsc.db.Commit(tx)
+	errCommit := rsc.db.Commit(tx)
+	if errCommit != nil {
+		log.Printf("[InsertUserAccountToDB] rsc.db.Commit() got an error: %+v\nMeta: %+v\n", errCommit, meta)
+	}
+
+	return nil
+}
+
+// UpdateUserAccountInDB will update user's account based on the given parameter.
+func (rsc *Resource) UpdateUserAccountInDB(ctx context.Context, param UpdateUserAccountParam) error {
+	meta := map[string]interface{}{
+		"first_name":    param.FirstName,
+		"last_name":     param.LastName,
+		"record_period": param.RecordPeriod,
+		"user_id":       param.UserID,
+	}
+
+	var err error
+	tx, err := rsc.db.BeginTX(ctx, nil)
 	if err != nil {
-		log.Printf("[InsertUserAccountToDB] rsc.db.Commit() got an error: %+v\nMeta: %+v\n", err, meta)
+		log.Printf("[UpdateUserAccountInDB] rsc.db.BeginTX() got an error: %+v\nMeta: %+v\n", err, meta)
 		return err
+	}
+
+	defer func() {
+		errRollback := rsc.rollbackTX(ctx, tx, err)
+		if errRollback != nil {
+			log.Printf("[UpdateUserAccountInDB] rsc.rollbackTX() got an error: %+v\nMeta: %+v\n", err, meta)
+		}
+	}()
+
+	err = rsc.db.UpdateUserAccount(ctx, tx, pgsql.UpdateUserAccountParam(param))
+	if err != nil {
+		log.Printf("[UpdateUserAccountInDB] rsc.db.UpdateUserAccount() got an error: %+v\nMeta: %+v\n", err, meta)
+		return err
+	}
+
+	errCommit := rsc.db.Commit(tx)
+	if errCommit != nil {
+		log.Printf("[UpdateUserAccountInDB] rsc.db.UpdateUserAccount() got an error: %+v\nMeta: %+v\n", errCommit, meta)
 	}
 
 	return nil
