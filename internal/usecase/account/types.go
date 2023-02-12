@@ -20,3 +20,11 @@ type UpdateUserAccountParam struct {
 	RecordPeriod int
 	UserID       int64
 }
+
+// UpdatePasswordParam represents parameter needed to update user's password.
+type UpdatePasswordParam struct {
+	Email       string
+	OldPassword string
+	Password    string
+	UserID      int64
+}

@@ -31,6 +31,9 @@ type resourceProvider interface {
 
 	// UpdateUserAccountInDB will update user's account based on the given parameter.
 	UpdateUserAccountInDB(ctx context.Context, param UpdateUserAccountParam) error
+
+	// UpdateUserPasswordInDB will update user's password based on the given parameter.
+	UpdateUserPasswordInDB(ctx context.Context, userID int64, password string) error
 }
 
 // infraProvider holds all methods from infra that will be needed in resource.

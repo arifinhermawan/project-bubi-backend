@@ -24,6 +24,14 @@ type updateUserAccount struct {
 	UserID       int64  `json:"user_id"`
 }
 
+// updateUserPassword represents parameters needed to update user's password.
+type updateUserPassword struct {
+	Email       string `json:"email"`
+	OldPassword string `json:"old_password"`
+	Password    string `json:"password"`
+	UserID      int64  `json:"user_id"`
+}
+
 // ------------------------
 // | structs for response |
 // ------------------------

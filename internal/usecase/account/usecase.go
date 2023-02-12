@@ -31,6 +31,9 @@ type accountServiceProvider interface {
 
 	// UpdateUserAccount will update the information of an existing user account.
 	UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error
+
+	// UpdateUserPassword will update password of an existing account.
+	UpdateUserPassword(ctx context.Context, userID int64, password string) error
 }
 
 // AccountUsecaseParam holds all parameters needed to instantiate

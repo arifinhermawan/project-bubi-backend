@@ -27,10 +27,11 @@ func HandleRequest(infra *server.Infra, handlers *server.Handlers) {
 func handleGetRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
 }
 
-// handleGetRequest will handle request with type GET
+// handlePatchRequest will handle request with type PATCH
 func handlePatchRequest(infra *server.Infra, handlers *server.Handlers, router *mux.Router) {
 	// account
 	router.HandleFunc("/account/update", infra.Auth.JWTAuthorization(handlers.Account.HandleUpdateUserAccount)).Methods("PATCH")
+	router.HandleFunc("/account/update_password", infra.Auth.JWTAuthorization(handlers.Account.HandleUpdateUserPassword)).Methods("PATCH")
 }
 
 // handlePostRequest will handle request with type POST

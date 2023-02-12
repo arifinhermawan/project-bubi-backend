@@ -100,7 +100,41 @@ func (rsc *Resource) UpdateUserAccountInDB(ctx context.Context, param UpdateUser
 
 	errCommit := rsc.db.Commit(tx)
 	if errCommit != nil {
-		log.Printf("[UpdateUserAccountInDB] rsc.db.UpdateUserAccount() got an error: %+v\nMeta: %+v\n", errCommit, meta)
+		log.Printf("[UpdateUserAccountInDB] rsc.db.Commit() got an error: %+v\nMeta: %+v\n", errCommit, meta)
+	}
+
+	return nil
+}
+
+// UpdateUserPasswordInDB will update user's password based on the given parameter.
+func (rsc *Resource) UpdateUserPasswordInDB(ctx context.Context, userID int64, password string) error {
+	meta := map[string]interface{}{
+		"user_id": userID,
+	}
+
+	var err error
+	tx, err := rsc.db.BeginTX(ctx, nil)
+	if err != nil {
+		log.Printf("[UpdateUserPasswordInDB] rsc.db.BeginTX() got an error: %+v\nMeta: %+v\n", err, meta)
+		return err
+	}
+
+	defer func() {
+		errRollback := rsc.rollbackTX(ctx, tx, err)
+		if errRollback != nil {
+			log.Printf("[UpdateUserPasswordInDB] rsc.rollbackTX() got an error: %+v\nMeta: %+v\n", err, meta)
+		}
+	}()
+
+	err = rsc.db.UpdateUserPassword(ctx, tx, userID, password)
+	if err != nil {
+		log.Printf("[UpdateUserPasswordInDB] rsc.db.UpdateUserPassword() got an error: %+v\nMeta: %+v\n", err, meta)
+		return err
+	}
+
+	errCommit := rsc.db.Commit(tx)
+	if errCommit != nil {
+		log.Printf("[UpdateUserPasswordInDB] rsc.db.Commit() got an error: %+v\nMeta: %+v\n", errCommit, meta)
 	}
 
 	return nil

@@ -123,6 +123,20 @@ func (mr *MockresourceProviderMockRecorder) UpdateUserAccountInDB(ctx, param int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccountInDB", reflect.TypeOf((*MockresourceProvider)(nil).UpdateUserAccountInDB), ctx, param)
 }
 
+// UpdateUserPasswordInDB mocks base method.
+func (m *MockresourceProvider) UpdateUserPasswordInDB(ctx context.Context, userID int64, password string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserPasswordInDB", ctx, userID, password)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserPasswordInDB indicates an expected call of UpdateUserPasswordInDB.
+func (mr *MockresourceProviderMockRecorder) UpdateUserPasswordInDB(ctx, userID, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPasswordInDB", reflect.TypeOf((*MockresourceProvider)(nil).UpdateUserPasswordInDB), ctx, userID, password)
+}
+
 // MockinfraProvider is a mock of infraProvider interface.
 type MockinfraProvider struct {
 	ctrl     *gomock.Controller
