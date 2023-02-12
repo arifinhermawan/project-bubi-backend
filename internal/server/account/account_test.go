@@ -1,6 +1,7 @@
 package account
 
 import (
+	// golang package
 	"context"
 	"encoding/json"
 	"net/http"
@@ -8,9 +9,12 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/arifinhermawan/bubi/internal/usecase/account"
+	// external package
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/usecase/account"
 )
 
 func TestHandler_HandleUserLogIn(t *testing.T) {
@@ -295,6 +299,163 @@ func TestHandler_HandleUpdateUserAccount(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			h.HandleUpdateUserAccount(w, req)
+		})
+	}
+}
+
+func TestHandler_HandleUpdateUserPassword(t *testing.T) {
+	type mockFields struct {
+		accountUC *MockaccountUCManager
+		infra     *MockinfraProvider
+	}
+	tests := []struct {
+		name       string
+		mockFields func(mockFields)
+	}{
+		{
+			name: "when_ReadAll_error_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, assert.AnError)
+			},
+		},
+		{
+			name: "when_JsonUnmarshal_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var dest updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &dest).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_email_empty_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var dest updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &dest).Return(nil)
+			},
+		},
+		{
+			name: "when_old_password_empty_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserPassword) = updateUserPassword{
+							Email: "email",
+						}
+
+						return nil
+					})
+			},
+		},
+		{
+			name: "when_password_empty_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserPassword) = updateUserPassword{
+							Email:       "email",
+							OldPassword: "old_pass",
+						}
+
+						return nil
+					})
+			},
+		},
+		{
+			name: "when_user_id_invalid_then_return_bad_request",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserPassword) = updateUserPassword{
+							Email:       "email",
+							OldPassword: "old_pass",
+							Password:    "password",
+						}
+
+						return nil
+					})
+			},
+		},
+		{
+			name: "when_UpdatePassword_error_then_return_internal_server_error",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserPassword) = updateUserPassword{
+							Email:       "email",
+							OldPassword: "old_pass",
+							Password:    "password",
+							UserID:      123,
+						}
+
+						return nil
+					})
+				mf.accountUC.EXPECT().UpdatePassword(context.Background(), account.UpdatePasswordParam{
+					Email:       "email",
+					OldPassword: "old_pass",
+					Password:    "password",
+					UserID:      123,
+				}).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_no_error_occured_then_return_ok",
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().ReadAll(gomock.Any()).Return(nil, nil)
+
+				var destination updateUserPassword
+				mf.infra.EXPECT().JsonUnmarshal(nil, &destination).DoAndReturn(
+					func(input []byte, dest interface{}) error {
+						*dest.(*updateUserPassword) = updateUserPassword{
+							Email:       "email",
+							OldPassword: "old_pass",
+							Password:    "password",
+							UserID:      123,
+						}
+
+						return nil
+					})
+				mf.accountUC.EXPECT().UpdatePassword(context.Background(), account.UpdatePasswordParam{
+					Email:       "email",
+					OldPassword: "old_pass",
+					Password:    "password",
+					UserID:      123,
+				}).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/account/update_password", nil)
+
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountUC: NewMockaccountUCManager(ctrl),
+				infra:     NewMockinfraProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			h := &Handler{
+				account: mockFields.accountUC,
+				infra:   mockFields.infra,
+			}
+
+			w := httptest.NewRecorder()
+			h.HandleUpdateUserPassword(w, req)
 		})
 	}
 }

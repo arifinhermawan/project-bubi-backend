@@ -91,4 +91,26 @@ func (svc *Service) UpdateUserAccount(ctx context.Context, param UpdateUserAccou
 	}
 
 	return nil
+
+}
+
+// UpdateUserPassword will update password of an existing account.
+func (svc *Service) UpdateUserPassword(ctx context.Context, userID int64, password string) error {
+	meta := map[string]interface{}{
+		"user_id": userID,
+	}
+
+	hashed, err := generateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("[UpdateUserPassword] generateFromPassword() got an error: %+v\nMeta:%+v\n", err, meta)
+		return err
+	}
+
+	err = svc.rsc.UpdateUserPasswordInDB(ctx, userID, string(hashed))
+	if err != nil {
+		log.Printf("[UpdateUserPassword] svc.rsc.UpdateUserPasswordInDB() got an error: %+v\nMeta:%+v\n", err, meta)
+		return err
+	}
+
+	return nil
 }

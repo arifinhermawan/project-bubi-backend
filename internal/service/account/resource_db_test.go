@@ -1,14 +1,18 @@
 package account
 
 import (
+	// golang package
 	"context"
 	"database/sql"
 	"testing"
 
-	"github.com/arifinhermawan/bubi/internal/entity"
-	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
+	// external package
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/entity"
+	"github.com/arifinhermawan/bubi/internal/repository/pgsql"
 )
 
 func TestResource_GetUserAccountByEmailFromDB(t *testing.T) {
@@ -214,7 +218,7 @@ func TestResource_UpdateUserAccountInDB(t *testing.T) {
 			wantErr: assert.AnError,
 		},
 		{
-			name: "when_InsertUserAccount_error_and_failed_to_rollback_transaction_then_log_the_error_then_return_error",
+			name: "when_UpdateUserAccount_error_and_failed_to_rollback_transaction_then_log_the_error_then_return_error",
 			args: mockArgs,
 			mockFields: func(mf mockFields) {
 				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
@@ -270,6 +274,99 @@ func TestResource_UpdateUserAccountInDB(t *testing.T) {
 			}
 
 			err := rsc.UpdateUserAccountInDB(context.Background(), test.args)
+			assert.Equal(t, test.wantErr, err)
+		})
+	}
+}
+
+func TestResource_UpdateUserPasswordInDB(t *testing.T) {
+	type mockFields struct {
+		db *MockdbRepoProvider
+	}
+
+	type args struct {
+		userID   int64
+		password string
+	}
+
+	tests := []struct {
+		name       string
+		args       args
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_BeginTX_error_then_return_error",
+			args: args{},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(nil, assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_UpdateUserPassword_error_then_rollback_transaction_then_return_error",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserPassword(context.Background(), &sql.Tx{}, int64(123), "pass").Return(assert.AnError)
+				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(nil)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_UpdateUserPassword_error_and_failed_to_rollback_transaction_then_log_the_error_then_return_error",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserPassword(context.Background(), &sql.Tx{}, int64(123), "pass").Return(assert.AnError)
+				mf.db.EXPECT().Rollback(&sql.Tx{}).Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_failed_to_commit_then_log_the_error",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserPassword(context.Background(), &sql.Tx{}, int64(123), "pass").Return(nil)
+				mf.db.EXPECT().Commit(&sql.Tx{}).Return(assert.AnError)
+			},
+		},
+		{
+			name: "when_no_error_occured_then_return_nil_error",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.db.EXPECT().BeginTX(context.Background(), nil).Return(&sql.Tx{}, nil)
+				mf.db.EXPECT().UpdateUserPassword(context.Background(), &sql.Tx{}, int64(123), "pass").Return(nil)
+				mf.db.EXPECT().Commit(&sql.Tx{}).Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				db: NewMockdbRepoProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			rsc := Resource{
+				db: mockFields.db,
+			}
+
+			err := rsc.UpdateUserPasswordInDB(context.Background(), test.args.userID, test.args.password)
 			assert.Equal(t, test.wantErr, err)
 		})
 	}

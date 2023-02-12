@@ -1,12 +1,16 @@
 package account
 
 import (
+	// golang package
 	"context"
 	"testing"
 
-	"github.com/arifinhermawan/bubi/internal/service/account"
+	// external package
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/service/account"
 )
 
 func TestUseCase_LogIn(t *testing.T) {
@@ -276,6 +280,73 @@ func TestUseCase_UserSignUp(t *testing.T) {
 			}
 
 			err := uc.UserSignUp(context.Background(), test.args.email, test.args.password)
+			assert.Equal(t, test.wantErr, err)
+		})
+	}
+}
+
+func TestUseCase_UpdatePassword(t *testing.T) {
+	type mockFields struct {
+		accountSvc *MockaccountServiceProvider
+	}
+	tests := []struct {
+		name       string
+		args       UpdatePasswordParam
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_CheckPasswordCorrect_error_then_return_error",
+			args: UpdatePasswordParam{
+				Email:       "email",
+				OldPassword: "oldpass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "oldpass").Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_UpdateUserPassword_error_then_return_error",
+			args: UpdatePasswordParam{
+				Email:       "email",
+				OldPassword: "oldpass",
+				Password:    "password",
+				UserID:      123,
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "oldpass").Return(nil)
+				mf.accountSvc.EXPECT().UpdateUserPassword(context.Background(), int64(123), "password").Return(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_no_error_occured_then_return_nil",
+			args: UpdatePasswordParam{
+				Email:       "email",
+				OldPassword: "oldpass",
+				Password:    "password",
+				UserID:      123,
+			},
+			mockFields: func(mf mockFields) {
+				mf.accountSvc.EXPECT().CheckPasswordCorrect(context.Background(), "email", "oldpass").Return(nil)
+				mf.accountSvc.EXPECT().UpdateUserPassword(context.Background(), int64(123), "password").Return(nil)
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				accountSvc: NewMockaccountServiceProvider(ctrl),
+			}
+			test.mockFields(mockFields)
+
+			uc := &UseCase{
+				account: mockFields.accountSvc,
+			}
+
+			err := uc.UpdatePassword(context.Background(), test.args)
 			assert.Equal(t, test.wantErr, err)
 		})
 	}

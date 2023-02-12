@@ -94,3 +94,29 @@ func (repo *DBRepository) UpdateUserAccount(ctx context.Context, tx *sql.Tx, par
 
 	return nil
 }
+
+// UpdateUserPassword will update user's password.
+func (repo *DBRepository) UpdateUserPassword(ctx context.Context, tx *sql.Tx, userID int64, password string) error {
+	timeout := time.Duration(repo.infra.GetConfig().Database.DefaultTimeout) * time.Second
+	ctxQuery, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	namedParam := map[string]interface{}{
+		"id":       userID,
+		"password": password,
+	}
+
+	namedQuery, args, err := funcSQLXNamed(queryUpdateUserPassword, namedParam)
+	if err != nil {
+		log.Printf("[UpdateUserPassword] funcSQLXNamed got an error: %+v\nMeta:%+v\n", err, namedParam)
+		return err
+	}
+
+	_, err = tx.ExecContext(ctxQuery, repo.db.Rebind(namedQuery), args...)
+	if err != nil {
+		log.Printf("[UpdateUserPassword] tx.ExecContext() got an error: %+v\nMeta:%+v\n", err, namedParam)
+		return err
+	}
+
+	return nil
+}

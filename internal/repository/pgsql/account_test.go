@@ -1,17 +1,21 @@
 package pgsql
 
 import (
+	// golang package
 	"context"
 	"database/sql"
 	"database/sql/driver"
 	"testing"
 	"time"
 
+	// external package
 	sqlmock "github.com/DATA-DOG/go-sqlmock"
-	"github.com/arifinhermawan/bubi/internal/infrastructure/configuration"
 	"github.com/golang/mock/gomock"
 	"github.com/jmoiron/sqlx"
 	"github.com/stretchr/testify/assert"
+
+	// internal package
+	"github.com/arifinhermawan/bubi/internal/infrastructure/configuration"
 )
 
 var (
@@ -374,6 +378,110 @@ func TestDBRepository_UpdateUserAccount(t *testing.T) {
 			}
 
 			err = r.UpdateUserAccount(context.Background(), tx, test.args.param)
+			assert.Equal(t, test.wantErr, err)
+			assert.Nil(t, mockSQL.ExpectationsWereMet())
+		})
+	}
+}
+
+func TestDBRepository_UpdateUserPassword(t *testing.T) {
+	funcSQLXNamedOri := sqlx.Named
+
+	expectedQuery := `
+		UPDATE
+			user_account
+		SET
+			password = $1
+		WHERE
+			id = $2
+	`
+
+	type mockFields struct {
+		infra *MockinfraProvider
+		sql   sqlmock.Sqlmock
+	}
+
+	type args struct {
+		userID   int64
+		password string
+	}
+	tests := []struct {
+		name       string
+		args       args
+		mockFields func(mockFields)
+		wantErr    error
+	}{
+		{
+			name: "when_funcSQLXNamed_error_then_return_error",
+			args: args{},
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().GetConfig().Return(mockConfig)
+
+				funcSQLXNamed = func(query string, arg interface{}) (string, []interface{}, error) {
+					return "", nil, assert.AnError
+				}
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_ExecContext_error_then_return_error",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().GetConfig().Return(mockConfig)
+
+				mf.sql.ExpectExec(expectedQuery).WillReturnError(assert.AnError)
+			},
+			wantErr: assert.AnError,
+		},
+		{
+			name: "when_no_error_occured_then_return_nil",
+			args: args{
+				userID:   123,
+				password: "pass",
+			},
+			mockFields: func(mf mockFields) {
+				mf.infra.EXPECT().GetConfig().Return(mockConfig)
+
+				mf.sql.ExpectExec(expectedQuery).
+					WithArgs(
+						"pass",
+						int64(123),
+					).WillReturnResult(driver.RowsAffected(1))
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockDB, mockSQL, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
+			if err != nil {
+				assert.Nil(t, err)
+				return
+			}
+
+			defer func() {
+				mockDB.Close()
+				funcSQLXNamed = funcSQLXNamedOri
+			}()
+
+			mockSQL.ExpectBegin().WillReturnError(nil)
+			tx, _ := mockDB.Begin()
+
+			ctrl := gomock.NewController(t)
+			mockFields := mockFields{
+				infra: NewMockinfraProvider(ctrl),
+				sql:   mockSQL,
+			}
+			test.mockFields(mockFields)
+
+			r := DBRepository{
+				infra: mockFields.infra,
+				db:    sqlx.NewDb(mockDB, "postgres"),
+			}
+
+			err = r.UpdateUserPassword(context.Background(), tx, test.args.userID, test.args.password)
 			assert.Equal(t, test.wantErr, err)
 			assert.Nil(t, mockSQL.ExpectationsWereMet())
 		})

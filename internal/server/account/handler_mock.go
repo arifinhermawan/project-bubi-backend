@@ -65,6 +65,20 @@ func (mr *MockaccountUCManagerMockRecorder) LogOut(ctx, userID interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LogOut", reflect.TypeOf((*MockaccountUCManager)(nil).LogOut), ctx, userID)
 }
 
+// UpdatePassword mocks base method.
+func (m *MockaccountUCManager) UpdatePassword(ctx context.Context, param account.UpdatePasswordParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePassword", ctx, param)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePassword indicates an expected call of UpdatePassword.
+func (mr *MockaccountUCManagerMockRecorder) UpdatePassword(ctx, param interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockaccountUCManager)(nil).UpdatePassword), ctx, param)
+}
+
 // UpdateUserAccount mocks base method.
 func (m *MockaccountUCManager) UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error {
 	m.ctrl.T.Helper()

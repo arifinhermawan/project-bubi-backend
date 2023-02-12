@@ -108,7 +108,6 @@ func (h *Handler) HandleUpdateUserAccount(w http.ResponseWriter, r *http.Request
 	}
 
 	var request updateUserAccount
-
 	err = h.infra.JsonUnmarshal(bytes, &request)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -147,6 +146,93 @@ func (h *Handler) HandleUpdateUserAccount(w http.ResponseWriter, r *http.Request
 		LastName:     request.LastName,
 		RecordPeriod: request.RecordPeriod,
 		UserID:       request.UserID,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		response.Code = http.StatusInternalServerError
+		response.Error = err.Error()
+		json.NewEncoder(w).Encode(response)
+
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	response.Code = http.StatusOK
+	response.Error = ""
+	json.NewEncoder(w).Encode(response)
+}
+
+// HandleUpdateUserPassword will update user's password.
+func (h *Handler) HandleUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := defaultResponse{
+		Error: "",
+		Code:  http.StatusBadRequest,
+	}
+
+	bytes, err := h.infra.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = err.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	var request updateUserPassword
+	err = h.infra.JsonUnmarshal(bytes, &request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = err.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.Email == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = errEmailEmpty.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.OldPassword == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = errPasswordEmpty.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.Password == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = errPasswordEmpty.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	if request.UserID <= 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		response.Code = http.StatusBadRequest
+		response.Error = errUserIDInvalid.Error()
+
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	err = h.account.UpdatePassword(context.Background(), account.UpdatePasswordParam{
+		Email:       request.Email,
+		OldPassword: request.OldPassword,
+		Password:    request.Password,
+		UserID:      request.UserID,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

@@ -36,4 +36,13 @@ const (
 		WHERE
 			id = :id
 	`
+
+	queryUpdateUserPassword = `
+		UPDATE
+			user_account
+		SET
+			password = :password
+		WHERE
+			id = :id
+	`
 )

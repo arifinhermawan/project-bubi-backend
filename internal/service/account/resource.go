@@ -32,6 +32,9 @@ type dbRepoProvider interface {
 
 	// UpdateUserAccount will update user's account information.
 	UpdateUserAccount(ctx context.Context, tx *sql.Tx, param pgsql.UpdateUserAccountParam) error
+
+	// UpdateUserPassword will update user's password.
+	UpdateUserPassword(ctx context.Context, tx *sql.Tx, userID int64, password string) error
 }
 
 // infraRepoProvider holds all methods from infra that will be needed in resource.

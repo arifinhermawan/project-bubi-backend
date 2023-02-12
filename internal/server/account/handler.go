@@ -25,6 +25,11 @@ type accountUCManager interface {
 	// Field that will be updated are: first_name, last_name, and record_period.
 	UpdateUserAccount(ctx context.Context, param account.UpdateUserAccountParam) error
 
+	// UpdatePassword will update user's password.
+	// It will check whether the old password correct or not.
+	// If it correct, then it will continue the update password process.
+	UpdatePassword(ctx context.Context, param account.UpdatePasswordParam) error
+
 	// UserSignUp will process the creation of user account.
 	// Before creating a new account, it'll check whether that account exist or not.
 	// If it's a new account, then it'll create a new user account.

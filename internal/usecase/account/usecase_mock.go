@@ -120,3 +120,17 @@ func (mr *MockaccountServiceProviderMockRecorder) UpdateUserAccount(ctx, param i
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserAccount", reflect.TypeOf((*MockaccountServiceProvider)(nil).UpdateUserAccount), ctx, param)
 }
+
+// UpdateUserPassword mocks base method.
+func (m *MockaccountServiceProvider) UpdateUserPassword(ctx context.Context, userID int64, password string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUserPassword", ctx, userID, password)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUserPassword indicates an expected call of UpdateUserPassword.
+func (mr *MockaccountServiceProviderMockRecorder) UpdateUserPassword(ctx, userID, password interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUserPassword", reflect.TypeOf((*MockaccountServiceProvider)(nil).UpdateUserPassword), ctx, userID, password)
+}
